@@ -19,6 +19,31 @@ app.wsgi_app = SharedDataMiddleware(app.wsgi_app, {
 })
 
 
+@app.route('/init', methods=['GET'])
+def init():
+    files = [file for file in os.listdir(app.config['UPLOAD_FOLDER'])]
+    for file in files:
+        os.remove(os.path.join(app.config['UPLOAD_FOLDER'], file))
+    return make_response('succeed', 200)
+
+
+@app.route('/copy', methods=['GET'])
+def copy():
+    try:
+        index = request.args.get('index')
+        indexNew = request.args.get('new_index')
+        in_file = open(os.path.join(app.config['UPLOAD_FOLDER'], index), "rb")
+        data = in_file.read()
+        in_file.close()
+
+        out_file = open(os.path.join(app.config['UPLOAD_FOLDER'], indexNew), "wb")
+        out_file.write(data)
+        out_file.close()
+        return make_response('succeed', 200)
+    except OSError:
+        return make_response('failed', 400)
+
+
 @app.route('/remove', methods=['GET'])
 def remove():
     index = request.args.get('index')
